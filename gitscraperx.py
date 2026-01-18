@@ -7,6 +7,8 @@ from threading import Thread
 
 class GitScraperX:
     def __init__(self, github_token):
+        # Logo and Credits
+        self.print_logo()
         self.token = github_token
         self.headers = {'Authorization': f'token {self.token}'}
         self.secrets_patterns = {
@@ -15,7 +17,21 @@ class GitScraperX:
             'AWS_ACCESS_KEY': r'AKIA[0-9A-Z]{16}',
             'SSH_PRIVATE_KEY': r'-----BEGIN RSA PRIVATE KEY-----',
         }
-    
+
+    def print_logo(self):
+        """Prints the GitScraperX logo and author credits."""
+        logo = r"""
+  ________.__  __  _________                                            ____  ___
+ /  _____/|__|/  |_/   _____/ ________________  ______   ___________  \   \/  /
+/   \  ___|  \   __\_____  \_/ ___\_  __ \__  \ \____ \_/ __ \_  __ \  \     / 
+\    \_\  \  ||  | /        \  \___|  | \// __ \|  |_> >  ___/|  | \/  /     \ 
+ \______  /__||__|/_______  /\___  >__|  (____  /   __/ \___  >__|    /___/\  \
+        \/                \/     \/           \/|__|        \/              \_/
+                                MADE BY n0merc
+        """
+        print(logo)
+        print("-" * 80)
+
     def search_repos(self, query, max_repos=50):
         """Search GitHub for repos matching the query."""
         url = f'https://api.github.com/search/repositories?q={query}&per_page={max_repos}'
@@ -25,7 +41,7 @@ class GitScraperX:
         else:
             print(f"Fuck! Failed to fetch repos: {response.status_code}")
             return []
-    
+
     def clone_repo(self, repo_url, local_path):
         """Clone a repo to a local directory."""
         try:
@@ -33,7 +49,7 @@ class GitScraperX:
             print(f"Cloned {repo_url} to {local_path}")
         except subprocess.CalledProcessError as e:
             print(f"Failed to clone {repo_url}: {e}")
-    
+
     def scan_for_secrets(self, repo_path):
         """Walk through the repo and scan for secrets."""
         findings = []
@@ -54,7 +70,7 @@ class GitScraperX:
                 except Exception as e:
                     continue  # Skip binary files or permission errors
         return findings
-    
+
     def run(self, query="password", max_repos=10):
         """Main function to search, clone, and scan."""
         repos = self.search_repos(query, max_repos)
@@ -69,6 +85,7 @@ class GitScraperX:
         # Save results
         with open('findings.json', 'w') as f:
             json.dump(all_findings, f, indent=4)
+        print("-" * 80)
         print(f"Scan complete. Found {len(all_findings)} potential secrets. Saved to findings.json")
 
 # Usage
